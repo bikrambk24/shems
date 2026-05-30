@@ -1,0 +1,36 @@
+/* SHEMS — custom overrides on top of Bootstrap 5 */
+
+/* Sidebar-style nav for role dashboards */
+.shems-sidebar {
+    min-height: calc(100vh - 56px);
+    background-color: #f8f9fa;
+    border-right: 1px solid #dee2e6;
+}
+
+/* Notification badge on the bell icon */
+.notif-badge {
+    position: relative;
+    top: -8px;
+    left: -4px;
+    font-size: 0.65rem;
+}
+
+/* Card colour coding for notification levels */
+.notif-info     { border-left: 4px solid #0d6efd; }
+.notif-warning  { border-left: 4px solid #ffc107; }
+.notif-critical { border-left: 4px solid #dc3545; }
+
+/* Dashboard energy chart container */
+.chart-container {
+    position: relative;
+    height: 300px;
+}
+
+/* Appliance power-on indicator */
+.appliance-on  { color: #198754; }   /* Bootstrap success green */
+.appliance-off { color: #6c757d; }   /* Bootstrap secondary grey */
+
+/* Fault ticket status badges */
+.status-open       { background-color: #dc3545; }
+.status-inprogress { background-color: #ffc107; color: #000; }
+.status-resolved   { background-color: #198754; }

@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Homeowners{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-people"></i> Homeowners</h2>
+
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0 align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th>Username</th><th>Email</th><th>Joined</th><th>Status</th><th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for homeowner in page_obj %}
+        <tr>
+          <td><strong>{{ homeowner.username }}</strong></td>
+          <td>{{ homeowner.email|default:"—" }}</td>
+          <td>{{ homeowner.date_joined|date:"d M Y" }}</td>
+          <td>
+            {% if homeowner.is_active %}
+              <span class="badge bg-success">Active</span>
+            {% else %}
+              <span class="badge bg-secondary">Inactive</span>
+            {% endif %}
+          </td>
+          <td>
+            <form method="post" action="{% url 'admin_toggle_user' homeowner.pk %}">
+              {% csrf_token %}
+              <button type="submit"
+                      class="btn btn-sm {% if homeowner.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %}"
+                      onclick="return confirm('Toggle active status for {{ homeowner.username }}?')">
+                {% if homeowner.is_active %}Deactivate{% else %}Activate{% endif %}
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="text-center text-muted py-3">No homeowners registered yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ─── Pagination ────────────────────────────────────────────────── -->
+{% if page_obj.has_other_pages %}
+<nav class="mt-3">
+  <ul class="pagination justify-content-center">
+    {% if page_obj.has_previous %}
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+    </li>
+    {% endif %}
+    <li class="page-item disabled">
+      <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    </li>
+    {% if page_obj.has_next %}
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+    </li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+{% endblock %}

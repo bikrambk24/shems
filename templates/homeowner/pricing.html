@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Pricing Plan{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-currency-pound"></i> Pricing Plan</h2>
+
+<!-- ─── Current plan ──────────────────────────────────────────────── -->
+<div class="card shadow-sm mb-4">
+  <div class="card-header fw-semibold">Your Current Plan</div>
+  <div class="card-body">
+    {% if current_plan %}
+    <h4>{{ current_plan.name }}
+      <span class="badge bg-success ms-2">Active</span>
+    </h4>
+    <dl class="row mt-3">
+      <dt class="col-sm-3">Strategy type</dt>
+      <dd class="col-sm-9">{{ current_plan.get_strategy_type_display }}
+        
+      </dd>
+      <dt class="col-sm-3">Base rate</dt>
+      <dd class="col-sm-9">{{ current_plan.base_rate }}p/kWh</dd>
+      {% if current_plan.strategy_type == 'TimeOfUse' %}
+      <dt class="col-sm-3">Peak rate</dt>
+      <dd class="col-sm-9">{{ current_plan.peak_rate }}p/kWh</dd>
+      <dt class="col-sm-3">Peak hours</dt>
+      <dd class="col-sm-9">{{ current_plan.peak_start_hour }}:00 – {{ current_plan.peak_end_hour }}:00</dd>
+      {% endif %}
+      {% if current_plan.strategy_type == 'GreenEnergy' %}
+      <dt class="col-sm-3">Green discount</dt>
+      <dd class="col-sm-9">{{ current_plan.green_discount_percent }}% off</dd>
+      {% endif %}
+    </dl>
+    {% else %}
+    <p class="text-muted">No plan selected yet. Choose one below.</p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- ─── Switch plan ───────────────────────────────────────────────── -->
+<div class="card shadow-sm mb-4">
+  <div class="card-header fw-semibold">Switch Plan</div>
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      <div class="row g-2 align-items-end">
+        <div class="col-md-6">
+          <label class="form-label">{{ form.pricing_plan.label }}</label>
+          <select name="pricing_plan" class="form-select">
+            <option value="">-- Choose a plan --</option>
+            {% for plan in all_active_plans %}
+            <option value="{{ plan.pk }}" {% if current_plan and plan.pk == current_plan.pk %}selected{% endif %}>
+              {{ plan.name }} ({{ plan.get_strategy_type_display }})
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-dark w-100">Switch</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ─── All plans comparison ──────────────────────────────────────── -->
+<div class="card shadow-sm">
+  <div class="card-header fw-semibold">Available Plans</div>
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead class="table-light"><tr>
+        <th>Name</th><th>Strategy</th><th>Base Rate</th><th>Peak Rate</th><th>Discount</th>
+      </tr></thead>
+      <tbody>
+        {% for plan in all_active_plans %}
+        <tr {% if current_plan and plan.pk == current_plan.pk %}class="table-success"{% endif %}>
+          <td>{{ plan.name }} {% if current_plan and plan.pk == current_plan.pk %}<span class="badge bg-success">Current</span>{% endif %}</td>
+          <td>{{ plan.get_strategy_type_display }}</td>
+          <td>{{ plan.base_rate }}p</td>
+          <td>{% if plan.peak_rate %}{{ plan.peak_rate }}p{% else %}—{% endif %}</td>
+          <td>{% if plan.green_discount_percent %}{{ plan.green_discount_percent }}%{% else %}—{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

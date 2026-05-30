@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}Appliances{% endblock %}
+
+{% block content %}
+<h2 class="mb-3"><i class="bi bi-plug"></i> My Appliances</h2>
+
+<!-- Add Appliance form (Factory Pattern) -->
+<div class="card shadow-sm mb-4">
+  <div class="card-header fw-semibold">
+    Add New Appliance
+    <small class="text-muted fw-normal ms-2">— uses the Factory Pattern to apply type defaults</small>
+  </div>
+  <div class="card-body">
+    <form method="post" action="{% url 'add_appliance' %}">
+      {% csrf_token %}
+      <div class="row g-2 align-items-end">
+        <div class="col-md-4">
+          <label class="form-label">{{ add_form.name.label }}</label>
+          {{ add_form.name }}
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">{{ add_form.appliance_type.label }}</label>
+          {{ add_form.appliance_type }}
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">{{ add_form.power_rating_kw.label }}</label>
+          {{ add_form.power_rating_kw }}
+          <div class="form-text">{{ add_form.power_rating_kw.help_text }}</div>
+        </div>
+        <div class="col-md-2 d-grid">
+          <button type="submit" class="btn btn-dark">Add</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ─── Edit Appliance form (shown when edit link is clicked) ─────── -->
+{% if editing %}
+<div class="card shadow-sm mb-4 border-warning">
+  <div class="card-header bg-warning fw-semibold">Editing: {{ editing.name }}</div>
+  <div class="card-body">
+    <form method="post" action="{% url 'edit_appliance' editing.pk %}">
+      {% csrf_token %}
+      <div class="row g-2 align-items-end">
+        <div class="col-md-5">
+          <label class="form-label">{{ edit_form.name.label }}</label>
+          {{ edit_form.name }}
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">{{ edit_form.power_rating_kw.label }}</label>
+          {{ edit_form.power_rating_kw }}
+        </div>
+        <div class="col-md-2 d-grid">
+          <button type="submit" class="btn btn-warning">Save</button>
+        </div>
+        <div class="col-md-2 d-grid">
+          <a href="{% url 'list_appliances' %}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endif %}
+
+<!-- Appliance list -->
+{% if appliances %}
+<div class="table-responsive">
+  <table class="table table-hover align-middle bg-white shadow-sm rounded">
+    <thead class="table-dark">
+      <tr>
+        <th>Name</th><th>Type</th><th>Power (kW)</th>
+        <th>Status</th><th>Faulty</th><th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for a in appliances %}
+      <tr>
+        <td><strong>{{ a.name }}</strong></td>
+        <td>{{ a.get_appliance_type_display }}</td>
+        <td>{{ a.power_rating_kw }}</td>
+        <td>
+          {% if a.is_on %}
+            <span class="badge bg-success">ON</span>
+          {% else %}
+            <span class="badge bg-secondary">OFF</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if a.is_faulty %}
+            <span class="badge bg-danger"><i class="bi bi-exclamation-triangle"></i> Faulty</span>
+          {% else %}
+            <span class="text-muted">—</span>
+          {% endif %}
+        </td>
+        <td>
+          <!-- Toggle ON/OFF -->
+          <form method="post" action="{% url 'toggle_appliance' a.pk %}" class="d-inline">
+            {% csrf_token %}
+            <button class="btn btn-sm {% if a.is_on %}btn-outline-danger{% else %}btn-outline-success{% endif %}">
+              {% if a.is_on %}Turn OFF{% else %}Turn ON{% endif %}
+            </button>
+          </form>
+
+          <!-- Edit -->
+          <a href="{% url 'edit_appliance' a.pk %}" class="btn btn-sm btn-outline-warning">Edit</a>
+
+          <!-- Report Fault -->
+          <form method="post" action="{% url 'report_fault' a.pk %}" class="d-inline">
+            {% csrf_token %}
+            <button class="btn btn-sm btn-outline-secondary"
+                    onclick="return confirm('Report a fault for {{ a.name }}?')">
+              <i class="bi bi-flag"></i> Fault
+            </button>
+          </form>
+
+          <!-- Delete -->
+          <form method="post" action="{% url 'delete_appliance' a.pk %}" class="d-inline">
+            {% csrf_token %}
+            <button class="btn btn-sm btn-outline-danger"
+                    onclick="return confirm('Delete {{ a.name }}? This cannot be undone.')">
+              <i class="bi bi-trash"></i>
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="alert alert-info">
+  No appliances yet. Use the form above to add your first one.
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Adding Bootstrap form-control class to the Django form widgets
+  document.querySelectorAll('form input, form select').forEach(el => {
+    if (!el.classList.contains('btn')) el.classList.add('form-control');
+  });
+</script>
+{% endblock %}

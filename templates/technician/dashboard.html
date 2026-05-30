@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Fault Tickets{% endblock %}
+
+{% block content %}
+<h2 class="mb-1"><i class="bi bi-tools"></i> Fault Tickets</h2>
+<p class="text-muted mb-4">
+  Open and in-progress tickets across all homes.
+  Auto-raised by <strong>TechnicianAlerter</strong> (Observer pattern)
+  when appliance power draw is ≥ 3× rated.
+</p>
+
+{% if tickets %}
+<div class="table-responsive">
+  <table class="table table-hover align-middle shadow-sm bg-white rounded">
+    <thead class="table-dark">
+      <tr>
+        <th>#</th><th>Appliance</th><th>Owner</th>
+        <th>Reported</th><th>Status</th><th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for ticket in tickets %}
+      <tr>
+        <td>{{ ticket.pk }}</td>
+        <td>
+          <strong>{{ ticket.appliance.name }}</strong><br>
+          <small class="text-muted">{{ ticket.appliance.get_appliance_type_display }} — {{ ticket.appliance.power_rating_kw }} kW rated</small>
+        </td>
+        <td>{{ ticket.appliance.owner.username }}</td>
+        <td class="text-nowrap">{{ ticket.reported_at|date:"d M Y H:i" }}</td>
+        <td>
+          {% if ticket.status == 'Open' %}
+            <span class="badge status-open text-white">Open</span>
+          {% elif ticket.status == 'InProgress' %}
+            <span class="badge status-inprogress">In Progress</span>
+          {% else %}
+            <span class="badge status-resolved text-white">Resolved</span>
+          {% endif %}
+        </td>
+        <td>
+          <a href="{% url 'technician_ticket_detail' ticket.pk %}"
+             class="btn btn-sm btn-dark">View / Update</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="alert alert-success">
+  <i class="bi bi-check-circle"></i>
+  No open or in-progress tickets. All systems are healthy.
+</div>
+{% endif %}
+{% endblock %}
