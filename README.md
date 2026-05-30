@@ -42,10 +42,7 @@ pip install -r requirements.txt
 # 4. Run migrations
 python manage.py migrate
 
-# 5. Seed demo data (creates users, appliances, energy readings)
-python manage.py seed_data
-
-# 6. Start the server
+# 5. Start the server
 python manage.py runserver
 ```
 
